@@ -5,9 +5,9 @@ module.exports = {
     name: require('../../package').name + '-test'
   },
   api: {
-    models: {},
-    controllers: {},
-    services: {}
+    scrapes: {
+      GoogleScrape: require('./GoogleScrape')
+    }
   },
   config: {
     scraper: {

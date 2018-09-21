@@ -7,25 +7,32 @@ export const Scraper = {
    * Create the Stores
    */
   configure: (app: FabrixApp) => {
-    return Promise.resolve()
-  },
-
-  init: (app: FabrixApp) => {
-
     const {
       max_connections,
       rate_limit,
       encoding,
+      incoming_encoding,
       jQuery,
-      pre_request
+      pre_request,
+      retries,
+      retry_timeout,
+      skip_duplicates,
+      rotate_UA,
+      user_agent,
+      referrer,
+      headers,
     } = app.config.get('scraper')
 
     const c = new Crawler({
       maxConnections: max_connections,
       rateLimit: rate_limit,
       encoding: encoding,
+      incomingEncoding: incoming_encoding,
+      retries: retries,
+      retryTimeout: retry_timeout,
       jQuery: jQuery,
       preRequest: pre_request,
+      skipDuplicates: skip_duplicates,
       callback: (err, res, done) => Scraper.callback(app, err, res, done)
     })
 
@@ -43,10 +50,15 @@ export const Scraper = {
           return Scraper.addToQueue(app, uri, options, preRequest)
         }
       },
-      queueSize: {
+      _queueSize: {
         value: () => {
           return Scraper.queueSize(app)
-        }
+        },
+        enumerable: false,
+        writable: false
+      },
+      queue: {
+        value: new Map()
       },
       direct: {
         value: (uri: string, skipEvent: boolean) => {
@@ -54,6 +66,19 @@ export const Scraper = {
         }
       }
     })
+  },
+
+  init: (app: FabrixApp) => {
+    app.scraper.crawler.on('schedule', (options) => {
+      app.scraper.queue.set(options.uri, options)
+    })
+
+    app.scraper.crawler.on('drain', (options) => {
+      app.log.info('app.scraper queue empty')
+      app.scraper.queue.clear()
+    })
+
+    return Promise.resolve()
   },
   /**
    * Unload the Stores
