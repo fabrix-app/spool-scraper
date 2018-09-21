@@ -6,45 +6,55 @@ export const Scraper = {
   /**
    * Create the Stores
    */
+  configure: (app: FabrixApp) => {
+    return Promise.resolve()
+  },
 
   init: (app: FabrixApp) => {
-    const options = app.config.get('scraper') || {}
+
+    const {
+      max_connections,
+      rate_limit,
+      encoding,
+      jQuery,
+      pre_request
+    } = app.config.get('scraper')
 
     const c = new Crawler({
-      ...options,
-      preRequest: (opts, done) => {
-        // 'options' here is not the 'options' you pass to 'c.queue',
-        // instead, it's the options that is going to be passed to 'request' module
-        console.log(opts)
-        // when done is called, the request will start
-        done()
-      },
-      callback: (err, res, done) => {
-        if (err) {
-          console.log(err)
+      maxConnections: max_connections,
+      rateLimit: rate_limit,
+      encoding: encoding,
+      jQuery: jQuery,
+      preRequest: pre_request,
+      callback: (err, res, done) => Scraper.callback(app, err, res, done)
+    })
+
+    return Object.defineProperties(app.spools.scraper.scraper, {
+      crawler: {
+        get: () => {
+          return c
+        },
+        set: (newInstances) => {
+          throw new Error('scraper.crawler can not be set through FabrixApp, check spool-scraper instead')
         }
-        else {
-          console.log(res.statusCode)
+      },
+      addToQueue: {
+        value: (uri: string, options?, preRequest?) => {
+          return Scraper.addToQueue(app, uri, options, preRequest)
+        }
+      },
+      queueSize: {
+        value: () => {
+          return Scraper.queueSize(app)
+        }
+      },
+      direct: {
+        value: (uri: string, skipEvent: boolean) => {
+          return Scraper.direct(app, uri, skipEvent)
         }
       }
     })
-
-    return {
-      get crawler() {
-        return c
-      },
-      set crawler(newInstances) {
-        throw new Error('scraper.crawler can not be set through FabrixApp, check spool-scraper instead')
-      },
-      addToQueue: (uri: string, preRequest?) => {
-        return Scraper.addToQueue(app, uri, preRequest)
-      },
-      direct: (uri: string, skipEvent: boolean) => {
-        return Scraper.direct(app, uri, skipEvent)
-      }
-    }
   },
-
   /**
    * Unload the Stores
    */
@@ -52,14 +62,36 @@ export const Scraper = {
     return Promise.resolve()
   },
 
-  addToQueue: (app: FabrixApp, uri: string, preRequest?) => {
+  /**
+   * Add Url to queue
+   */
+  addToQueue: (app: FabrixApp, uri: string, options: {[key: string]: any} = {}, preRequest?) => {
     app.log.info('app.scraper.addToQueue', uri)
-    return app.scraper.crawler.queue({
-      uri: uri,
-      ...preRequest
+    return new Promise((resolve, reject) => {
+      try {
+        app.scraper.crawler.queue({
+          uri: uri,
+          ...options,
+          ...preRequest
+        })
+        resolve(uri)
+      }
+      catch (err) {
+        reject(err)
+      }
     })
   },
 
+  /**
+   * Get the size of the queue
+   */
+  queueSize: (app: FabrixApp) => {
+    return app.scraper.crawler.queueSize
+  },
+
+  /**
+   * Directly Crawl a url
+   */
   direct: (app: FabrixApp, uri: string, skipEventRequest: boolean = false) => {
     app.log.info('app.scraper.addToQueue', 'CALLING DIRECT', uri)
     return new Promise((resolve, reject) => {
@@ -74,6 +106,19 @@ export const Scraper = {
         }
       })
     })
+  },
+
+  /**
+   *
+   */
+  callback(app: FabrixApp, err, res, done) {
+    if (err) {
+      console.log('CB', err)
+    }
+    else {
+      console.log('CB', res.statusCode)
+      done()
+    }
   }
 
 }

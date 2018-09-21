@@ -54,17 +54,17 @@ export class ScraperSpool extends ExtensionSpool {
   }
 
   /**
-   * Check if there some stores, if not set a default one
+   * Configure
    */
   configure() {
-    this.scraper = Scraper.init(this.app)
+    return Scraper.configure(this.app)
   }
 
   /**
    * create caching stores
    */
   async initialize() {
-    // this.scraper = Scraper.init(this.app)
+    return Scraper.init(this.app)
   }
 
   /**
