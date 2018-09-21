@@ -1,0 +1,1 @@
+export { scraperConfig } from './scraperConfig'
