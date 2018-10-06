@@ -36,7 +36,7 @@ export const Scraper = {
       callback: (err, res, done) => Scraper.callback(app, err, res, done)
     })
 
-    return Object.defineProperties(app.spools.scraper.scraper, {
+    return {
       crawler: {
         get: () => {
           return c
@@ -61,11 +61,11 @@ export const Scraper = {
         value: new Map()
       },
       direct: {
-        value: (uri: string, skipEvent: boolean) => {
+        value: (uri: string, skipEvent?: boolean) => {
           return Scraper.direct(app, uri, skipEvent)
         }
       }
-    })
+    }
   },
 
   init: (app: FabrixApp) => {
@@ -91,7 +91,7 @@ export const Scraper = {
    * Add Url to queue
    */
   addToQueue: (app: FabrixApp, uri: string, options: {[key: string]: any} = {}, preRequest?) => {
-    app.log.info('app.scraper.addToQueue', uri)
+    app.log.info(`app.scraper.addToQueue ${uri}`)
     return new Promise((resolve, reject) => {
       try {
         app.scraper.crawler.queue({
@@ -118,7 +118,7 @@ export const Scraper = {
    * Directly Crawl a url
    */
   direct: (app: FabrixApp, uri: string, skipEventRequest: boolean = false) => {
-    app.log.info('app.scraper.addToQueue', 'CALLING DIRECT', uri)
+    app.log.info(`app.scraper.direct ${uri}`)
     return new Promise((resolve, reject) => {
       app.scraper.crawler.direct({
         uri: uri,
@@ -138,12 +138,11 @@ export const Scraper = {
    */
   callback(app: FabrixApp, err, res, done) {
     if (err) {
-      console.log('CB', err)
+      app.log.info('app.scraper called directly and did not supply a callback', err)
     }
     else {
-      console.log('CB', res.statusCode)
+      app.log.info('app.scraper called directly and did not supply a callback', res.statusCode)
       done()
     }
   }
-
 }

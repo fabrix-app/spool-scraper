@@ -6,7 +6,7 @@ module.exports = {
   },
   api: {
     scrapes: {
-      GoogleScrape: require('./GoogleScrape')
+      AmazonScrape: require('./AmazonScrape')
     }
   },
   config: {

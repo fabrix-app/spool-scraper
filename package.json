@@ -1,6 +1,6 @@
 {
   "name": "@fabrix/spool-scraper",
-  "version": "1.5.0-alpha.1",
+  "version": "1.5.0",
   "description": "Spool: Scraper for Fabrix to implement HashiCorp's https://scraperproject.io/",
   "homepage": "https://fabrix.app",
   "author": {

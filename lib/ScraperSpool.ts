@@ -57,7 +57,8 @@ export class ScraperSpool extends ExtensionSpool {
    * Configure
    */
   configure() {
-    return Scraper.configure(this.app)
+    Object.defineProperties(this.scraper, Scraper.configure(this.app))
+    return
   }
 
   /**
