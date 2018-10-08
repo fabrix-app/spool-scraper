@@ -31,12 +31,12 @@ export class Scrape extends FabrixGeneric {
       })
   }
 
-  private process(res): Promise<any> {
+  process(res): Promise<any> {
     this.app.log.info(`${this.id} grabbed ${res.body.length} bytes with the default process method`)
     return Promise.resolve(res)
   }
 
-  private reject(err) {
+  private reject(err): Promise<any> {
     this.app.log.error(err)
     return Promise.reject(err)
   }

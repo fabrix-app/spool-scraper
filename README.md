@@ -66,7 +66,7 @@ For more information about store (type and configuration) please see the scraper
 ## Usage
 For the best results, create a Scrape Class and override the default process method. 
 ```ts
-  import { Scrape } from '@fabrix/spool-scrapper'
+  import { Scrape } from '@fabrix/spool-scraper'
   
   export class AmazonScrape extends Scrape {
     process(res): Promise<any> {
